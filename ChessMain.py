@@ -52,7 +52,9 @@ def main():
                 if len(playerClicks) == 2:
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                     print(move.getChessNotation())
-                    gs.makeMove(move)
+                    if gs.makeMove(move):
+                        gs.makeMove(move)
+                        animateMove(move, screen, gs.board, clock)
                     if gs.makeMove(move) == "same_color":
                         playerClicks = [playerClicks[1]]
                         sqSelected = playerClicks[0]
@@ -303,6 +305,37 @@ def drawPieces(screen, board):
             piece = board[r][c]
             if piece != "--":
                 screen.blit(IMAGES[piece], p.Rect(c * SQ_SIZE, TOP_MARGIN + r * SQ_SIZE, SQ_SIZE, SQ_SIZE))            
+
+def animateMove(move, screen, board, clock):
+    colors = [p.Color("white"), p.Color("gray")]
+    dr = move.endRow - move.startRow
+    dc = move.endCol - move.startCol
+    framesPerSquare = 10  # Adjust this for animation speed
+    frameCount = (abs(dr) + abs(dc)) * framesPerSquare
+    for frame in range(frameCount + 1):
+        r, c = (move.startRow + dr * frame / frameCount, move.startCol + dc * frame / frameCount)
+        drawBoard(screen)
+        drawPieces(screen, board)
+        
+        # Draw an empty square on the starting position to clear the moving piece
+        startSquareColor = colors[(move.startRow + move.startCol) % 2]
+        startSquare = p.Rect(move.startCol * SQ_SIZE, move.startRow * SQ_SIZE + TOP_MARGIN, SQ_SIZE, SQ_SIZE)
+        p.draw.rect(screen, startSquareColor, startSquare)
+        
+        # Draw the end square and captured piece if any
+        endSquareColor = colors[(move.endRow + move.endCol) % 2]
+        endSquare = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE + TOP_MARGIN, SQ_SIZE, SQ_SIZE)
+        p.draw.rect(screen, endSquareColor, endSquare)
+        
+        if move.pieceCaptured != "--":
+            screen.blit(IMAGES[move.pieceCaptured], endSquare)
+        
+        # Draw the moving piece
+        screen.blit(IMAGES[move.pieceMoved], p.Rect(c * SQ_SIZE, TOP_MARGIN + r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+        p.display.flip()
+        clock.tick(60)
+
+    
 
 if __name__ == "__main__":
     main()

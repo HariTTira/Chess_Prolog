@@ -46,10 +46,11 @@ class GameState():
                 self.prolog.assertz(f"piece({piece}, {endRow}, {endCol})")
                 self.moveLog.append(move)
                 self.whiteToMove = not self.whiteToMove
+                return True
             else:
-                print("Invalid move")
+                return False
         else:
-            print("Not your move")
+            return False
         
     def myMove(self, piece):
         piece = piece[0]
